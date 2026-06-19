@@ -3,8 +3,23 @@
 # Build outputs
 *-bin
 app/*/*-bin
+/gateway
+*.exe
+*.dll
+*.so
+*.dylib
 
 # Local runtime environment files
 app/identity/etc/hostname
 app/identity/etc/hosts
 app/identity/etc/resolv.conf
+
+# Temporary scripts
+fix_admin.go
+test_hash.go
+
+# Environments & IDE
+.idea/
+.vscode/
+*.env
+*.log
