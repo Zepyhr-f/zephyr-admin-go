@@ -1,1 +1,10 @@
 .DS_Store
+
+# Build outputs
+*-bin
+app/*/*-bin
+
+# Local runtime environment files
+app/identity/etc/hostname
+app/identity/etc/hosts
+app/identity/etc/resolv.conf
