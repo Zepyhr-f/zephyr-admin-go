@@ -1,5 +1,4 @@
-# syntax=docker/dockerfile:1
-FROM golang:alpine AS builder
+FROM docker.1ms.run/library/golang:alpine AS builder
 
 LABEL stage=gobuilder
 
@@ -16,10 +15,9 @@ RUN go mod edit -go=1.24.0 && go mod download
 COPY . .
 
 WORKDIR /build/app/auth
-RUN --mount=type=cache,id=auth-build,target=/root/.cache/go-build \
-    go build -ldflags="-s -w" -o /app/auth auth.go
+RUN go build -ldflags="-s -w" -o /app/auth auth.go
 
-FROM alpine
+FROM docker.1ms.run/library/alpine:latest
 
 RUN apk update --no-cache && apk add --no-cache ca-certificates tzdata
 ENV TZ Asia/Shanghai
