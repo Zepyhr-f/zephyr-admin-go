@@ -52,7 +52,11 @@ services:
       - auth
       - identity
     volumes:
-      - /app/logs/gateway:/app/logs/gateway
+      # Gateway writes its own log dir AND reads every other service's logs
+      # for the sysadmin "服务日志监控" feature. Mounting the parent /app/logs
+      # rather than each subdir keeps both behaviours in one bind. The
+      # handlers themselves are GET-only so there's no write path.
+      - /app/logs:/app/logs
     logging:
       driver: json-file
       options:

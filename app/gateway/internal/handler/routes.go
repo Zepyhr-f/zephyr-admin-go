@@ -14,6 +14,7 @@ import (
 	menu "zephyr-go/app/gateway/internal/handler/menu"
 	post "zephyr-go/app/gateway/internal/handler/post"
 	role "zephyr-go/app/gateway/internal/handler/role"
+	syslogmon "zephyr-go/app/gateway/internal/handler/syslogmon"
 	user "zephyr-go/app/gateway/internal/handler/user"
 	"zephyr-go/app/gateway/internal/svc"
 
@@ -206,4 +207,30 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			rest.WithPrefix("/api/v1/ai"+group),
 		)
 	}
+
+	// Sysadmin "服务日志监控" — read-only log browser. P1 only enforces JWT;
+	// the sys:log:list / search / tail / download perms are deferred to P3
+	// per the design doc.
+	// SSE tail must NOT be wrapped in go-zero's default TimeoutHandler
+	// (which buffers the entire response and breaks streaming). Register it
+	// alone with WithTimeout(0) — go-zero treats 0 as "no timeout".
+	server.AddRoutes(
+		[]rest.Route{
+			{Method: http.MethodGet, Path: "/services/:svc/files/:file/tail", Handler: syslogmon.TailHandler(serverCtx)},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1/sysadmin/logs"),
+		rest.WithTimeout(0),
+	)
+	server.AddRoutes(
+		[]rest.Route{
+			{Method: http.MethodGet, Path: "/services", Handler: syslogmon.ListServicesHandler(serverCtx)},
+			{Method: http.MethodGet, Path: "/services/:svc/files", Handler: syslogmon.ListFilesHandler(serverCtx)},
+			{Method: http.MethodGet, Path: "/services/:svc/files/:file", Handler: syslogmon.ReadFileHandler(serverCtx)},
+			{Method: http.MethodGet, Path: "/services/:svc/files/:file/search", Handler: syslogmon.SearchHandler(serverCtx)},
+			{Method: http.MethodGet, Path: "/services/:svc/files/:file/download", Handler: syslogmon.DownloadHandler(serverCtx)},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1/sysadmin/logs"),
+	)
 }

@@ -3,6 +3,7 @@ module zephyr-go
 go 1.26.3
 
 require (
+	github.com/fsnotify/fsnotify v1.10.1
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
 	github.com/zeromicro/go-zero v1.10.2
