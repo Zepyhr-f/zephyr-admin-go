@@ -37,7 +37,7 @@ func (l *PostPageLogic) PostPage(req *types.PostPageReq) (resp *types.PostPageRe
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var records []types.PostDetail
 	for _, v := range rpcResp.Records {
 		records = append(records, types.PostDetail{

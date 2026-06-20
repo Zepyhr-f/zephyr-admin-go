@@ -16,4 +16,16 @@ type Config struct {
 		AccessSecret string
 		AccessExpire int64
 	}
+	BizRedis struct {
+		Host string
+		Pass string
+		DB   int
+	}
+	Gateway struct {
+		SignSecret      string
+		SignTTLSeconds  int
+		AiUpstream      string
+		AiPathPrefix    string
+		AiUpstreamStrip string
+	}
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	adminextra "zephyr-go/app/gateway/internal/handler/adminextra"
+	aiproxy "zephyr-go/app/gateway/internal/handler/aiproxy"
 	auth "zephyr-go/app/gateway/internal/handler/auth"
 	dept "zephyr-go/app/gateway/internal/handler/dept"
 	identity "zephyr-go/app/gateway/internal/handler/identity"
@@ -173,4 +174,36 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
 		rest.WithPrefix("/api/v1/devtools"),
 	)
+
+	// AI proxy: /api/v1/ai/health is public so docker / nginx can probe it,
+	// the rest of /api/v1/ai/* requires a valid JWT and gets the user context
+	// + gateway HMAC injected before forwarding to zephyr-ai.
+	server.AddRoutes(
+		[]rest.Route{
+			{Method: http.MethodGet, Path: "/health", Handler: aiproxy.ForwardHandler(serverCtx)},
+		},
+		rest.WithPrefix("/api/v1/ai"),
+	)
+	aiSubGroups := []string{
+		"/api/v1/rag/", "/api/v1/knowledge/", "/api/v1/conversations/",
+		"/api/v1/feedback/", "/api/v1/admin/",
+	}
+	aiMethods := []string{
+		http.MethodGet, http.MethodPost, http.MethodPut,
+		http.MethodDelete, http.MethodPatch,
+	}
+	for _, group := range aiSubGroups {
+		routes := make([]rest.Route, 0, len(aiMethods)*2)
+		for _, m := range aiMethods {
+			routes = append(routes,
+				rest.Route{Method: m, Path: "/", Handler: aiproxy.ForwardHandler(serverCtx)},
+				rest.Route{Method: m, Path: "/:rest", Handler: aiproxy.ForwardHandler(serverCtx)},
+			)
+		}
+		server.AddRoutes(
+			routes,
+			rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+			rest.WithPrefix("/api/v1/ai"+group),
+		)
+	}
 }

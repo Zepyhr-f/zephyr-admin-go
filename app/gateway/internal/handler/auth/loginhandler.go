@@ -35,7 +35,7 @@ func LoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 				Value:    resp.RefreshToken,
 				Path:     "/",
 				HttpOnly: true,
-				Secure:   true,                      // 生产环境应为 true (HTTPS)
+				Secure:   true,                                                    // 生产环境应为 true (HTTPS)
 				Expires:  time.Unix(resp.AccessExpire, 0).Add(7 * 24 * time.Hour), // 也可以从配置读取
 			})
 

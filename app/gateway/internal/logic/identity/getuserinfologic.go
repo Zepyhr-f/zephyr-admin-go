@@ -6,9 +6,9 @@ package identity
 import (
 	"context"
 
-	"zephyr-go/app/identity/identityservice"
 	"zephyr-go/app/gateway/internal/svc"
 	"zephyr-go/app/gateway/internal/types"
+	"zephyr-go/app/identity/identityservice"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
